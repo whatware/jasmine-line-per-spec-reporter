@@ -1,0 +1,46 @@
+{
+  "version": "0.1.0",
+  "name": "jasmine-line-per-spec-reporter",
+  "description": "Always report one line per spec, regardless of spec status.",
+  "author": {
+    "email": "justmike-github.com@whatware.com",
+    "name": "justmike",
+    "url" : "https://github.com/justmike"
+  },
+  "bugs": {
+    "email": "justmike-github.com@whatware.com",
+    "url" : "https://github.com/whatware/jasmine-line-per-spec-reporter/issues"
+  },
+  "bundledDependencies": [],
+  "dependencies": {
+    "lodash": "^4.11.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=4.4.1"
+  },
+  "keywords": [
+    "reporter",
+    "spec",
+    "line",
+    "single",
+    "jasmine"
+  ],
+  "license": "MIT",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/whatware/jasmine-line-per-spec-reporter/LICENSE"
+    }
+  ],
+  "main": "dist/jasmine-line-per-spec-reporter.js",
+  "optionalDependencies": {},
+  "peerDependencies": {
+    "jasmine": "2.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/whatware/jasmine-line-per-spec-reporter.git"
+  },
+  "scripts": {}
+}
