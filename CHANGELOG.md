@@ -50,5 +50,5 @@ _n/a_
 
 _n/a_
 
-[0.2.0...Unreleased]: https://github.com/whatware/jasmine-disable-remaining/compare/0.2.0...master "Compare 0.2.0 to Unreleased"
-[0.1.0...0.2.0]: https://github.com/whatware/jasmine-disable-remaining/compare/0.1.0...0.2.0 "Compare 0.1.0 to 0.2.0"
+[0.2.0...Unreleased]: https://github.com/whatware/jasmine-line-per-spec-reporter/compare/0.2.0...master "Compare 0.2.0 to Unreleased"
+[0.1.0...0.2.0]: https://github.com/whatware/jasmine-line-per-spec-reporter/compare/0.1.0...0.2.0 "Compare 0.1.0 to 0.2.0"
