@@ -1,4 +1,4 @@
-# jasmine-line-per-spec-reporter 0.1.0 (2016-04-18)
+# jasmine-line-per-spec-reporter 0.2.0 (2016-04-19)
 
 Always report one line per spec, regardless of spec status.
 
@@ -66,21 +66,53 @@ to let `npm` automatically add it there.
 
 ### `protractor`
 
-In your `protractor.conf.js` file
+In your `protractor.conf.js` file:
 
-* At the top, or with the other `require` lines, add:
+- At the top, or with the other `require` lines, add:
 
-```js
-const JasmineLinePerSpecReporter = require('jasmine-line-per-spec-reporter');
-```
+    ```js
+    const JasmineLinePerSpecReporter = require('jasmine-line-per-spec-reporter');
+    ```
 
-* In the `config.onPrepare` function, add:
+- In the `config.onPrepare` function, add:
 
-```js
-    if (browser.params.linePerSpecReporter === true) {
-        jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine));
-    }
-```
+    ```js
+        if (browser.params.linePerSpecReporter === true) {
+            jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine));
+        }
+    ```
+
+- You can also see **stack trace** lines that only match the path to your spec files,
+without all the extra stack trace junk you get from the default reporter.
+E.g., If you project root folder is `my-project-folder` and all your tests are in `my-project-folder/test/spec`,
+then in the `config.onPrepare` function, add:
+
+    ```js
+        if (browser.params.linePerSpecReporter === true) {
+            const conifg = {
+                failureExpectationMessageSuffixLine: '',
+                failureSuffixLine: null,
+                showStackTrace: true,
+                showStackTraceRegExMatch: /^.*[\\\/](my-project-folder[\\\/]test[\\\/]spec[\\\/].*)\)$/g,
+                showStackTraceRegExReplace: '  at $1',
+                showStackTraceRegExShowMax: 1
+            };
+            jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine, config));
+        }
+    ```
+    
+    This will produce output for each failure showing only the first stack trace line that matches your criteria, like the following:
+
+    ```sh
+    Passed   -   1/4 - Suite one Sub-suite AAA Spec one
+    FAILED   -   2/4 - Suite one Sub-suite BBB Spec two
+                       Expected 1 to be 0.
+                       Stack trace (replaced lines):
+                         at my-project-folder/test/spec/myTest.js:10:8
+
+    Pending  -   3/4 - Suite one Sub-suite BBB Spec three
+    Disabled -   4/4 - Suite one Sub-suite CCC Spec four
+    ```
 
 ### `grunt` + `protractor`
 
@@ -139,14 +171,50 @@ grunt test --linePerSpecReporter=true
 
 ## TODO
 
-* **Needs documentation** --
+- **Needs documentation** --
 Until documented here, see
 `defaultConfig` in [`dist/jasmine-line-per-spec-reporter.js`](dist/jasmine-line-per-spec-reporter.js)
 for properties that can be set using `optionalConfig` as:
 
-```js
-        jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine, optionalConfig));
-```
+    ```js
+            jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine, optionalConfig));
+    ```
+
+- **Feature** --
+Optional time prefixes:
+
+    - Delta -- time between each spec as `SS.mmm`, e.g.:
+
+        ```sh
+        00.000 Passed   -   1/4 - Suite one Sub-suite AAA Spec one
+        00.250 FAILED   -   2/4 - Suite one Sub-suite BBB Spec two
+                                  Expected 1 to be 0.
+
+        00.133 Pending  -   3/4 - Suite one Sub-suite BBB Spec three
+        00.088 Disabled -   4/4 - Suite one Sub-suite CCC Spec four
+        ```
+
+    - Relative -- time since first spec `MM:SS.mmm`, e.g.:
+
+        ```sh
+        00:00.000 Passed   -   1/4 - Suite one Sub-suite AAA Spec one
+        00:00.133 FAILED   -   2/4 - Suite one Sub-suite BBB Spec two
+                                     Expected 1 to be 0.
+
+        00:00.250 Pending  -   3/4 - Suite one Sub-suite BBB Spec three
+        00:00.250 Disabled -   4/4 - Suite one Sub-suite CCC Spec four
+        ```
+
+    - Current -- current time as `YYYY-MM-DD HH:MM:SS.mmm`, e.g.:
+
+        ```sh
+        2016-04-19 16:00:00.000 Passed   -   1/4 - Suite one Sub-suite AAA Spec one
+        2016-04-19 16:00:00.133 FAILED   -   2/4 - Suite one Sub-suite BBB Spec two
+                                                   Expected 1 to be 0.
+
+        2016-04-19 16:00:00.250 Pending  -   3/4 - Suite one Sub-suite BBB Spec three
+        2016-04-19 16:00:00.250 Disabled -   4/4 - Suite one Sub-suite CCC Spec four
+        ```
 
 ## Changelog / Release History
 

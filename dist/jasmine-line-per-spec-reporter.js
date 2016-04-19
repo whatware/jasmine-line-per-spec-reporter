@@ -8,6 +8,12 @@
  *   const JasmineLinePerSpecReporter = require('jasmine-line-per-spec-reporter');
  *   ... somewhere the `jasmine` global is now set:
  *   jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine));
+ *
+ * Note: when showing stack traces, you probably want:
+ *   failureExpectationMessagePrefixLine: null,
+ *   failureExpectationMessageSuffixLine: '',
+ *   failurePrefixLine: null,
+ *   failureSuffixLine: null,
  */
 
 const _ = require('lodash');
@@ -27,6 +33,10 @@ module.exports = () => {
         messagePrefixIndentStr: '',
         separator: ' - ',
         showExpectation: true,
+        showStackTrace: false,
+        showStackTraceRegExMatch: null,
+        showStackTraceRegExReplace: null,
+        showStackTraceRegExShowMax: 1,
         statusDisplay: {
             disabled: 'Disabled',
             failed: 'FAILED',
@@ -105,15 +115,7 @@ module.exports = () => {
 
                 config.log(`${config.statusDisplayPadded[result.status]}${description}`);
 
-                if (config.showExpectation === true) {
-                    result.failedExpectations.forEach((failedExpectation) => {
-                        if (!failedExpectation.passed) {
-                            logPossiblyIndentedIfString(log, indent, indentStr, config.failureExpectationMessagePrefixLine);
-                            logPossiblyIndentedIfString(log, indent, indentStr, failedExpectation.message);
-                            logPossiblyIndentedIfString(log, indent, indentStr, config.failureExpectationMessageSuffixLine);
-                        }
-                    });
-                }
+                showExpectations(config, result);
 
                 logPossiblyIndentedIfString(log, indent, indentStr, config.failureSuffixLine);
             } else if (Object.keys(config.statusDisplayPadded).indexOf(result.status) >= 0) {
@@ -156,6 +158,72 @@ module.exports = () => {
      */
     function rightPad(value, padStr) {
         return `${value}${padStr}`.substring(0, padStr.length);
+    }
+
+    function showExpectations(config, result) {
+        const log = config.log;
+        const indent = config.indentExpectation;
+        const indentStr = config.messagePrefixIndentStr;
+
+        if (config.showExpectation !== true) {
+            return;
+        }
+
+        result.failedExpectations.forEach((failedExpectation) => {
+            if (!failedExpectation.passed) {
+                logPossiblyIndentedIfString(log, indent, indentStr, config.failureExpectationMessagePrefixLine);
+                logPossiblyIndentedIfString(log, indent, indentStr, failedExpectation.message);
+
+                showStackTraces(config, failedExpectation);
+
+                logPossiblyIndentedIfString(log, indent, indentStr, config.failureExpectationMessageSuffixLine);
+            }
+        });
+    }
+
+    function showStackTraces(config, failedExpectation) {
+        const log = config.log;
+        const indent = config.indentExpectation;
+        const indentStr = config.messagePrefixIndentStr;
+
+        if (config.showStackTrace !== true) {
+            return;
+        }
+
+        if (!_.isRegExp(config.showStackTraceRegExMatch)) {
+            logPossiblyIndentedIfString(log, indent, indentStr, 'Stack trace:');
+            logPossiblyIndentedIfString(log, indent, indentStr, failedExpectation.stack);
+            return;
+        }
+
+        const stackTraceLines = failedExpectation.stack.split('\n');
+        let showMax = config.showStackTraceRegExShowMax;
+        if (!_.isNumber(showMax)) {
+            showMax = 0;
+        }
+        let matchCount = 0;
+        stackTraceLines.forEach((line) => {
+            if (line.match(config.showStackTraceRegExMatch)) {
+                ++matchCount;
+                if (showMax === 0 || matchCount <= showMax) {
+                    if (matchCount === 1) {
+                        if (_.isString(config.showStackTraceRegExReplace)) {
+                            logPossiblyIndentedIfString(log, indent, indentStr, 'Stack trace (replaced lines):');
+                        } else {
+                            logPossiblyIndentedIfString(log, indent, indentStr, 'Stack trace (matched lines):');
+                        }
+                    }
+                    if (_.isString(config.showStackTraceRegExReplace)) {
+                        const replacedLine = line.replace(config.showStackTraceRegExMatch, config.showStackTraceRegExReplace);
+                        if (replacedLine.length > 0) {
+                            logPossiblyIndentedIfString(log, indent, indentStr, replacedLine);
+                        }
+                    } else {
+                        logPossiblyIndentedIfString(log, indent, indentStr, line);
+                    }
+                }
+            }
+        });
     }
 
     return JasmineLinePerSpecReporter;
