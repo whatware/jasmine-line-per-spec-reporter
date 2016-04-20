@@ -24,9 +24,10 @@ module.exports = () => {
         failureExpectationMessageSuffixLine: null,
         failurePrefixLine: null,
         failureSuffixLine: '',
+        hideDisabledSpecs: false,
 
         // TODO:
-        hideDisabledSpecs: false,
+        hidePendingSpecs: false,
         indentExpectation: true,
         log: console.log,
         maxDigitPlaces: 3,
@@ -57,6 +58,7 @@ module.exports = () => {
                     config: defaultConfig,
                     data: {
                         curSpecCount: 0,
+                        disabledCount: 0,
                         totalSpecsDefined: 0
                     }
                 },
@@ -80,6 +82,22 @@ module.exports = () => {
         // standard jasmine reporter methods
 
         /*
+         * Jasmine calls this method once all describes/its have been completed
+         */
+        jasmineDone() {
+            const config = this.jasmineLinePerSpecReporter.config;
+            const data = this.jasmineLinePerSpecReporter.data;
+
+            if (config.hideDisabledSpecs && data.disabledCount > 0) {
+                if (data.disabledCount > 1) {
+                    config.log(`\n${data.disabledCount} disabled specs were hidden`);
+                } else {
+                    config.log(`\n${data.disabledCount} disabled spec was hidden`);
+                }
+            }
+        }
+
+        /*
          * Jasmine calls this method once all describes/its have been "initialized"
          */
         jasmineStarted(summary) {
@@ -87,6 +105,7 @@ module.exports = () => {
             const data = this.jasmineLinePerSpecReporter.data;
 
             data.curSpecCount = 0;
+            data.disabledCount = 0;
             data.totalSpecsDefined = summary.totalSpecsDefined;
 
             const nOfMLength = String(data.totalSpecsDefined).length * 2 + 1;
@@ -119,6 +138,12 @@ module.exports = () => {
 
                 logPossiblyIndentedIfString(log, indent, indentStr, config.failureSuffixLine);
             } else if (Object.keys(config.statusDisplayPadded).indexOf(result.status) >= 0) {
+                if (result.status === 'disabled') {
+                    ++data.disabledCount;
+                    if (config.hideDisabledSpecs) {
+                        return;
+                    }
+                }
                 config.log(`${config.statusDisplayPadded[result.status]}${description}`);
             } else {
                 config.log(`${result.status} ${description}`);

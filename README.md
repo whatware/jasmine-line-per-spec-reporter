@@ -1,4 +1,4 @@
-# jasmine-line-per-spec-reporter 0.2.0 (2016-04-19)
+# jasmine-line-per-spec-reporter 0.3.0 (2016-04-20)
 
 Always report one line per spec, regardless of spec status.
 
@@ -80,6 +80,32 @@ In your `protractor.conf.js` file:
         if (browser.params.linePerSpecReporter === true) {
             jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine));
         }
+    ```
+
+- You can also **hide disabled** specs.
+So, if you're using any fdescribe/fit, or [disabling remaining lines on failure](https://github.com/whatware/jasmine-disable-remaining),
+you won't see superfluous Disabled lines.
+In the `config.onPrepare` function, add:
+
+    ```js
+        if (browser.params.linePerSpecReporter === true) {
+            const conifg = {
+                hideDisabled: true
+            };
+            jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine, config));
+        }
+    ```
+    
+    This will produce output like the following:
+
+    ```sh
+    Passed   -   1/4 - Suite one Sub-suite AAA Spec one
+    FAILED   -   2/4 - Suite one Sub-suite BBB Spec two
+                       Expected 1 to be 0.
+
+    Pending  -   3/4 - Suite one Sub-suite BBB Spec three
+    
+    1 disabled spec was hidden
     ```
 
 - You can also see **stack trace** lines that only match the path to your spec files,
@@ -172,9 +198,9 @@ grunt test --linePerSpecReporter=true
 ## TODO
 
 - **Needs documentation** --
-Until documented here, see
+Until fully documented, see
 `defaultConfig` in [`dist/jasmine-line-per-spec-reporter.js`](dist/jasmine-line-per-spec-reporter.js)
-for properties that can be set using `optionalConfig` as:
+for all of the properties that can be set using `optionalConfig` as:
 
     ```js
             jasmine.getEnv().addReporter(new JasmineLinePerSpecReporter(jasmine, optionalConfig));
